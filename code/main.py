@@ -138,4 +138,3 @@ if __name__ == '__main__':
     # opt = load_sp_params()
     opt = load_dblp_params_method()
     main(opt)
-
