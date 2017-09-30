@@ -1,8 +1,8 @@
 #!/bin/bash
 ## Name of the input corpus
-corpusName=dblp
+corpusName=toy
 ## Name of the taxonomy
-taxonName=our-l3-0.25
+taxonName=non-para
 ## If need preprocessing from raw input, set it to be 1, otherwise, set 0
 FIRST_RUN=${FIRST_RUN:- 0}
 

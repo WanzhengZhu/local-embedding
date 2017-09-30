@@ -111,10 +111,15 @@ def main(opt):
     n_cluster_iter = opt['n_cluster_iter']
     level = 0
 
-    # our method
-    root_dir = opt['data_dir'] + 'our-l3-0.15/'
+    # Non-para
+    root_dir = opt['data_dir'] + 'non-para/'
     copy_tree(init_dir, root_dir)
     recur(input_dir, root_dir, n_cluster, '*', n_cluster_iter, filter_thre, n_expand, level, True, True)
+
+    # TaxonGen
+    # root_dir = opt['data_dir'] + 'our-l3-0.15/'
+    # copy_tree(init_dir, root_dir)
+    # recur(input_dir, root_dir, n_cluster, '*', n_cluster_iter, filter_thre, n_expand, level, True, True)
 
     # without caseolap
     # root_dir = opt['data_dir'] + 'ablation-no-caseolap-l3/'
@@ -133,8 +138,8 @@ def main(opt):
 
 
 if __name__ == '__main__':
-    # opt = load_toy_params()
+    opt = load_toy_params()
     # opt = load_dblp_params()
     # opt = load_sp_params()
-    opt = load_dblp_params_method()
+    # opt = load_dblp_params_method()
     main(opt)
