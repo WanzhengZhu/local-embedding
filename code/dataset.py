@@ -90,6 +90,7 @@ class SubDataSet:
         ret = []
         for word in self.keywords:
             vec = embeddings[word]
+            vec = vec / np.linalg.norm(vec)  # Normalize to unit length
             ret.append(vec)
         return np.array(ret)
 

@@ -4,6 +4,7 @@ __description__: Main function for TaxonGen
 __latest_updates__: 09/26/2017
 '''
 import time
+import argparse
 from dataset import DataSet
 from cluster import run_clustering
 from paras import *
@@ -13,6 +14,7 @@ from local_embedding_training import main_local_embedding
 from shutil import copyfile
 from distutils.dir_util import copy_tree
 from os import symlink
+from meanshift import run_meanshift
 
 MAX_LEVEL = 3
 
@@ -71,9 +73,12 @@ def recur(input_dir, node_dir, n_cluster, parent, n_cluster_iter, filter_thre,\
         for iter in range(n_cluster_iter):
             if iter > 0:
                 df.seed_keyword_file = df.filtered_keyword_file
+
+            # children = run_meanshift(full_data, df.doc_id_file, df.seed_keyword_file, node_dir, parent, df.cluster_keyword_file, df.hierarchy_file, df.doc_membership_file)
+
             try:
-                children = run_clustering(full_data, df.doc_id_file, df.seed_keyword_file, n_cluster, node_dir, parent,\
-                               df.cluster_keyword_file, df.hierarchy_file, df.doc_membership_file)
+                # children = run_clustering(full_data, df.doc_id_file, df.seed_keyword_file, n_cluster, node_dir, parent,df.cluster_keyword_file, df.hierarchy_file, df.doc_membership_file)
+                children = run_meanshift(full_data, df.doc_id_file, df.seed_keyword_file, node_dir, parent, df.cluster_keyword_file, df.hierarchy_file, df.doc_membership_file)
             except:
                 print('Clustering not finished.')
                 return
@@ -99,8 +104,7 @@ def recur(input_dir, node_dir, n_cluster, parent, n_cluster_iter, filter_thre,\
             print("[Main] Finish running local embedding training using %s (seconds)" % (end - start))
 
     for child in children:
-        recur(input_dir, node_dir + child + '/', n_cluster, child, n_cluster_iter, \
-              filter_thre, n_expand, level + 1, caseolap, local_embedding)
+        recur(input_dir, node_dir + child + '/', n_cluster, child, n_cluster_iter, filter_thre, n_expand, level + 1, caseolap, local_embedding)
 
 def main(opt):
     input_dir = opt['input_dir']
@@ -138,8 +142,15 @@ def main(opt):
 
 
 if __name__ == '__main__':
-    opt = load_toy_params()
-    # opt = load_dblp_params()
-    # opt = load_sp_params()
+    parser = argparse.ArgumentParser(prog='main.py', description='')
+    parser.add_argument('-dataset', required=False, default='toy', help='toy or dblp or sp')
+    args = parser.parse_args()
+    print("Loading " + args.dataset + " dataset...")
+    if args.dataset == 'toy':
+        opt = load_toy_params()
+    elif args.dataset == 'dblp':
+        opt = load_dblp_params()
+    elif args.dataset == 'sp':
+        opt = load_sp_params()
     # opt = load_dblp_params_method()
     main(opt)

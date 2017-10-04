@@ -23,6 +23,7 @@ class Clusterer:
     def fit(self):
         self.clus.fit(self.data)
         labels = self.clus.labels_
+        # print(labels)
         for idx, label in enumerate(labels):
             self.clusters[label].append(idx)
         self.membership = labels

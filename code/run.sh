@@ -1,6 +1,6 @@
 #!/bin/bash
 ## Name of the input corpus
-corpusName=toy
+corpusName=dblp
 ## Name of the taxonomy
 taxonName=non-para
 ## If need preprocessing from raw input, set it to be 1, otherwise, set 0
@@ -32,7 +32,7 @@ if [ ! -d ../data/$corpusName/$taxonName ]; then
 fi
 
 echo 'Start TaxonGen'
-python main.py
+python main.py -dataset $corpusName
 
 echo 'Generate compressed taxonomy'
 if [ ! -d ../data/$corpusName/taxonomies ]; then

@@ -101,7 +101,7 @@ def load_sp_params():
     pd['n_cluster_iter'] = 5
     return pd
 
-#
+
 # def load_dblp_params_method():
 #     pd = dict()
 #     pd['data_dir'] = '/Users/wanzheng/Desktop/local-embedding/data/dblp/'
