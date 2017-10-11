@@ -17,15 +17,15 @@ class Meanshifter:
     def __init__(self, data):
         self.data = data
         self.n_cluster = None
-        bandwidth = estimate_bandwidth(data, quantile=0.004)
-        self.clus = SphericalMeanShift(bandwidth=bandwidth)
+        bandwidth = estimate_bandwidth(data, quantile=0.015)
+        self.clus = SphericalMeanShift(bandwidth=bandwidth, n_jobs=1, cluster_all=True, bin_seeding=True)
 
-        # for quantile in [0.003, 0.004, 0.005, 0.007, 0.01, 0.1, 0.2, 0.3]:
+        # for quantile in [0.015, 0.1, 0.2, 0.3]:
         #     bandwidth = estimate_bandwidth(data, quantile=quantile)
         #     print('Bandwidth for quantile=' , quantile , ': ' , bandwidth)
         #
-        # for bandwidth in [1.07, 1.05]:
-        #     self.clus = SphericalMeanShift(bandwidth=bandwidth)
+        # for bandwidth in [0.8, 0.9, 1]:
+        #     self.clus = SphericalMeanShift(bandwidth=bandwidth, n_jobs=1, cluster_all=False, bin_seeding=True)
         #     self.clus.fit(self.data)
         #     print('number of estimated clusters for bandwidth = ', bandwidth, ': ', len(np.unique(self.clus.labels_)))
 

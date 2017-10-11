@@ -143,7 +143,7 @@ def main(opt):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='main.py', description='')
-    parser.add_argument('-dataset', required=False, default='toy', help='toy or dblp or sp')
+    parser.add_argument('-dataset', required=False, default='dblp', help='toy or dblp or sp')
     args = parser.parse_args()
     print("Loading " + args.dataset + " dataset...")
     if args.dataset == 'toy':
