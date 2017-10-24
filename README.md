@@ -1,7 +1,7 @@
 # local-embedding
 1. (Done)Adaptive MeanShift Code: Generate some synthetic data and see what the code outputs. Don’t have to read the code line by line. 
 
-2. Save the data file and use Adaptive Meanshift Code to run on the written file. 
+2. (Done)Save the data file and use Adaptive Meanshift Code to run on the written file. 
 
 1. (Done)实现spherical meanshift
 

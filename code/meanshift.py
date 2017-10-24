@@ -9,16 +9,47 @@ from spherecluster import SphericalKMeans
 from dataset import SubDataSet
 from spherical_meanshift import SphericalMeanShift, estimate_bandwidth
 import numpy as np
+from scipy import stats
 from sklearn.datasets.samples_generator import make_blobs
+import subprocess
 
 
 class Meanshifter:
 
-    def __init__(self, data):
+    def __init__(self, data, parent_direcotry):
         self.data = data
         self.n_cluster = None
-        bandwidth = estimate_bandwidth(data, quantile=0.015)
-        self.clus = SphericalMeanShift(bandwidth=bandwidth, n_jobs=1, cluster_all=True, bin_seeding=True)
+        filename = 'keyword_embeddings.txt'
+        np.savetxt(parent_direcotry + filename, data, header=str(data.shape[0]) + " " + str(data.shape[1]), comments='')
+        print('[MeanShift] MeanShift Started...')
+        subprocess.call(["../data/synthetic/fams/cmake-build-debug/fams", "30", "46", "100", filename[:-4], parent_direcotry, "-f", "0.05", "10", "1"])
+        print('[MeanShift] MeanShift finished...')
+        # subprocess.call(["../data/synthetic/fams/cmake-build-debug/fams", "20", "46", "1", filename[:-4], parent_direcotry, "-f", "0.05", "10", "2"])
+
+        self.clus = SphericalKMeans()
+        self.clus.cluster_centers_ = np.loadtxt(parent_direcotry + 'modes_' + filename)
+        # if self.clus.cluster_centers_.size == 21:  # Just one cluster center
+        #     self.clus.cluster_centers_ = np.delete(self.clus.cluster_centers_, 0)
+        # else:
+        self.clus.cluster_centers_ = np.delete(self.clus.cluster_centers_, np.s_[0:1], axis=1)
+        labels = np.loadtxt(parent_direcotry + 'out_' + filename)
+        self.clus.labels_ = None
+        for i in range(len(labels)):
+            new_label = stats.mode(np.where(self.clus.cluster_centers_ == labels[i])[0])[0]
+            if new_label.size == 0:
+                cos_score = -1
+                for j in range(len(self.clus.cluster_centers_)):
+                    new_cos_score = self.calc_cosine(self.clus.cluster_centers_[j], self.data[i])
+                    # new_cos_score = np.dot(self.clus.cluster_centers_[j], self.data[i])
+                    if new_cos_score >= cos_score:
+                        new_label = j
+                        cos_score = new_cos_score
+            self.clus.labels_ = np.append(self.clus.labels_, new_label)
+        self.clus.labels_ = np.delete(self.clus.labels_, 0)  # Delete the first None
+
+        # bandwidth = estimate_bandwidth(data, quantile=0.188)
+        # self.clus = SphericalMeanShift(bandwidth=1.0, n_jobs=1, cluster_all=True, bin_seeding=True)
+        # self.clus.fit(self.data)
 
         # for quantile in [0.015, 0.1, 0.2, 0.3]:
         #     bandwidth = estimate_bandwidth(data, quantile=quantile)
@@ -30,14 +61,13 @@ class Meanshifter:
         #     print('number of estimated clusters for bandwidth = ', bandwidth, ': ', len(np.unique(self.clus.labels_)))
 
         self.clusters = defaultdict(list)  # cluster id -> members
-        self.membership = None  # a list contain the membership of the data points
-        self.center_ids = None  # a list contain the ids of the cluster centers
-        self.inertia_scores = None
-
-    def fit(self):
-        self.clus.fit(self.data)
         self.n_cluster = len(np.unique(self.clus.labels_))
         print('number of estimated clusters : ', self.n_cluster)
+        self.membership = None  # a list contain the membership of the data points
+        self.center_ids = None  # a list contain the ids of the cluster centers
+        # self.inertia_scores = None
+
+    def fit(self):
         labels = self.clus.labels_
         print(labels)
         for i in range(self.n_cluster):
@@ -127,7 +157,7 @@ def run_meanshift(full_data, doc_id_file, filter_keyword_file, parent_direcotry,
     dataset = SubDataSet(full_data, doc_id_file, filter_keyword_file)
     print('Start Mean Shifting for ', len(dataset.keywords), ' keywords under parent:', parent_description)
     ## TODO: change later here for n_cluster selection from a range
-    clus = Meanshifter(dataset.embeddings)
+    clus = Meanshifter(dataset.embeddings, parent_direcotry)
     clus.fit()
     print('Done clustering for ', len(dataset.keywords), ' keywords under parent:', parent_description)
     dataset.write_cluster_members(clus, cluster_keyword_file, parent_direcotry)

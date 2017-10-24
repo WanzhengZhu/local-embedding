@@ -1,6 +1,7 @@
 #!/bin/bash
 ## Name of the input corpus
-corpusName=dblp
+corpusName=${1:-toy}
+#corpusName=toy
 ## Name of the taxonomy
 taxonName=non-para
 ## If need preprocessing from raw input, set it to be 1, otherwise, set 0
@@ -9,7 +10,7 @@ FIRST_RUN=${FIRST_RUN:- 0}
 if [ $FIRST_RUN -eq 1 ]; then
 	echo 'Start data preprocessing'
 	## compile word2vec for embedding learning
-	gcc word2vec.c -o word2veec -lm -pthread -O2 -Wall -funroll-loops -Wno-unused-result
+	gcc word2vec.c -o word2vec -lm -pthread -O2 -Wall -funroll-loops -Wno-unused-result
 
 	## create initial folder if not exist
 	if [ ! -d ../data/$corpusName/init ]; then
