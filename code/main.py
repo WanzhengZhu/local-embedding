@@ -16,7 +16,7 @@ from distutils.dir_util import copy_tree
 from os import symlink
 from meanshift import run_meanshift
 
-MAX_LEVEL = 3
+MAX_LEVEL = 0
 
 class DataFiles:
     def __init__(self, input_dir, node_dir):
@@ -64,8 +64,8 @@ def recur(input_dir, node_dir, n_cluster, parent, n_cluster_iter, filter_thre,\
         # children = run_meanshift(full_data, df.doc_id_file, df.seed_keyword_file, node_dir, parent, df.cluster_keyword_file, df.hierarchy_file, df.doc_membership_file)
 
         try:
-            # children = run_clustering(full_data, df.doc_id_file, df.seed_keyword_file, n_cluster, node_dir, parent, df.cluster_keyword_file, df.hierarchy_file, df.doc_membership_file)
-            children = run_meanshift(full_data, df.doc_id_file, df.seed_keyword_file, node_dir, parent, df.cluster_keyword_file, df.hierarchy_file, df.doc_membership_file)
+            children = run_clustering(full_data, df.doc_id_file, df.seed_keyword_file, n_cluster, node_dir, parent, df.cluster_keyword_file, df.hierarchy_file, df.doc_membership_file)
+            # children = run_meanshift(full_data, df.doc_id_file, df.seed_keyword_file, node_dir, parent, df.cluster_keyword_file, df.hierarchy_file, df.doc_membership_file)
         except:
             print('Clustering not finished.')
             return
@@ -79,8 +79,8 @@ def recur(input_dir, node_dir, n_cluster, parent, n_cluster_iter, filter_thre,\
             # children = run_meanshift(full_data, df.doc_id_file, df.seed_keyword_file, node_dir, parent, df.cluster_keyword_file, df.hierarchy_file, df.doc_membership_file)
 
             try:
-                # children = run_clustering(full_data, df.doc_id_file, df.seed_keyword_file, n_cluster, node_dir, parent,df.cluster_keyword_file, df.hierarchy_file, df.doc_membership_file)
-                children = run_meanshift(full_data, df.doc_id_file, df.seed_keyword_file, node_dir, parent, df.cluster_keyword_file, df.hierarchy_file, df.doc_membership_file)
+                children = run_clustering(full_data, df.doc_id_file, df.seed_keyword_file, n_cluster, node_dir, parent,df.cluster_keyword_file, df.hierarchy_file, df.doc_membership_file)
+                # children = run_meanshift(full_data, df.doc_id_file, df.seed_keyword_file, node_dir, parent, df.cluster_keyword_file, df.hierarchy_file, df.doc_membership_file)
             except:
                 print('Clustering not finished.')
                 return
@@ -120,7 +120,7 @@ def main(opt):
     # Non-para
     root_dir = opt['data_dir'] + 'non-para/'
     copy_tree(init_dir, root_dir)
-    recur(input_dir, root_dir, n_cluster, '*', n_cluster_iter, filter_thre, n_expand, level, True, True)
+    recur(input_dir, root_dir, n_cluster, '*', n_cluster_iter, filter_thre, n_expand, level, True, False)
 
     # TaxonGen
     # root_dir = opt['data_dir'] + 'our-l3-0.15/'
@@ -145,7 +145,7 @@ def main(opt):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='main.py', description='')
-    parser.add_argument('-dataset', required=False, default='toy', help='toy or dblp or sp')
+    parser.add_argument('-dataset', required=False, default='dblp', help='toy or dblp or sp')
     args = parser.parse_args()
     print("Loading " + args.dataset + " dataset...")
     if args.dataset == 'toy':

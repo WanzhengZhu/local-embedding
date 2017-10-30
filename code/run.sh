@@ -1,7 +1,6 @@
 #!/bin/bash
 ## Name of the input corpus
 corpusName=${1:-toy}
-#corpusName=toy
 ## Name of the taxonomy
 taxonName=non-para
 ## If need preprocessing from raw input, set it to be 1, otherwise, set 0
