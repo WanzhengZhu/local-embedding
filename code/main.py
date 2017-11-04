@@ -16,7 +16,7 @@ from distutils.dir_util import copy_tree
 from os import symlink
 from meanshift import run_meanshift
 
-MAX_LEVEL = 0
+MAX_LEVEL = 1
 
 class DataFiles:
     def __init__(self, input_dir, node_dir):
@@ -31,6 +31,9 @@ class DataFiles:
         self.doc_membership_file = node_dir + 'paper_cluster.txt'
         self.hierarchy_file = node_dir + 'hierarchy.txt'
         self.cluster_keyword_file = node_dir + 'cluster_keywords.txt'
+        self.cluster_keyword_embedding = node_dir + 'cluster_keywords_embedding.txt'
+        self.cluster_keyword_label = node_dir + 'cluster_keywords_label.txt'
+
 
         self.caseolap_keyword_file = node_dir + 'caseolap.txt'
         self.filtered_keyword_file = node_dir + 'keywords.txt'
@@ -48,7 +51,7 @@ level: the current level in the recursion
 
 
 def recur(input_dir, node_dir, n_cluster, parent, n_cluster_iter, filter_thre,\
-          n_expand, level, caseolap=True, local_embedding=True):
+          n_expand, level, caseolap=True, local_embedding=True, filter_keyword=True):
     if level > MAX_LEVEL:
         return
     print('============================= Running level ', level, ' and node ', parent, '=============================')
@@ -64,7 +67,7 @@ def recur(input_dir, node_dir, n_cluster, parent, n_cluster_iter, filter_thre,\
         # children = run_meanshift(full_data, df.doc_id_file, df.seed_keyword_file, node_dir, parent, df.cluster_keyword_file, df.hierarchy_file, df.doc_membership_file)
 
         try:
-            children = run_clustering(full_data, df.doc_id_file, df.seed_keyword_file, n_cluster, node_dir, parent, df.cluster_keyword_file, df.hierarchy_file, df.doc_membership_file)
+            children = run_clustering(full_data, df.doc_id_file, df.seed_keyword_file, n_cluster, node_dir, parent, df.cluster_keyword_file, df.hierarchy_file, df.doc_membership_file, df.cluster_keyword_embedding, df.cluster_keyword_label, filter_keyword, 0)
             # children = run_meanshift(full_data, df.doc_id_file, df.seed_keyword_file, node_dir, parent, df.cluster_keyword_file, df.hierarchy_file, df.doc_membership_file)
         except:
             print('Clustering not finished.')
@@ -79,17 +82,19 @@ def recur(input_dir, node_dir, n_cluster, parent, n_cluster_iter, filter_thre,\
             # children = run_meanshift(full_data, df.doc_id_file, df.seed_keyword_file, node_dir, parent, df.cluster_keyword_file, df.hierarchy_file, df.doc_membership_file)
 
             try:
-                children = run_clustering(full_data, df.doc_id_file, df.seed_keyword_file, n_cluster, node_dir, parent,df.cluster_keyword_file, df.hierarchy_file, df.doc_membership_file)
+                children = run_clustering(full_data, df.doc_id_file, df.seed_keyword_file, n_cluster, node_dir, parent,df.cluster_keyword_file, df.hierarchy_file, df.doc_membership_file, df.cluster_keyword_embedding, df.cluster_keyword_label, filter_keyword, iter)
                 # children = run_meanshift(full_data, df.doc_id_file, df.seed_keyword_file, node_dir, parent, df.cluster_keyword_file, df.hierarchy_file, df.doc_membership_file)
             except:
                 print('Clustering not finished.')
                 return
 
-            start = time.time()
-            main_caseolap(df.link_file, df.doc_membership_file, df.cluster_keyword_file, df.caseolap_keyword_file)
-            main_rank_phrase(df.caseolap_keyword_file, df.filtered_keyword_file, filter_thre)
-            end = time.time()
-            print("[Main] Finish running CaseOALP using %s (seconds)" % (end - start))
+            if iter != n_cluster_iter-1:  # Needless to run for the last loop
+                print("[Main] Start to run CaseOALP ")
+                start = time.time()
+                main_caseolap(df.link_file, df.doc_membership_file, df.cluster_keyword_file, df.caseolap_keyword_file)
+                main_rank_phrase(df.caseolap_keyword_file, df.filtered_keyword_file, filter_thre)
+                end = time.time()
+                print("[Main] Finish running CaseOALP using %s (seconds)" % (end - start))
 
     # prepare the embedding for child level
     if level < MAX_LEVEL:
@@ -120,7 +125,7 @@ def main(opt):
     # Non-para
     root_dir = opt['data_dir'] + 'non-para/'
     copy_tree(init_dir, root_dir)
-    recur(input_dir, root_dir, n_cluster, '*', n_cluster_iter, filter_thre, n_expand, level, True, False)
+    recur(input_dir, root_dir, n_cluster, '*', n_cluster_iter, filter_thre, n_expand, level, True, False, True)
 
     # TaxonGen
     # root_dir = opt['data_dir'] + 'our-l3-0.15/'
@@ -145,7 +150,7 @@ def main(opt):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='main.py', description='')
-    parser.add_argument('-dataset', required=False, default='dblp', help='toy or dblp or sp')
+    parser.add_argument('-dataset', required=False, default='toy', help='toy or dblp or sp')
     args = parser.parse_args()
     print("Loading " + args.dataset + " dataset...")
     if args.dataset == 'toy':

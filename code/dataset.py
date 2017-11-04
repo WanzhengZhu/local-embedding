@@ -8,6 +8,8 @@ import numpy as np
 from collections import defaultdict
 from math import log
 from utils import ensure_directory_exist
+import time
+
 
 # the complete data set
 class DataSet:
@@ -60,15 +62,47 @@ class DataSet:
 # sub data set for each cluster
 class SubDataSet:
 
-    def __init__(self, full_data, doc_id_file, keyword_file):
-        self.keywords = self.load_keywords(keyword_file, full_data)
+    def __init__(self, full_data, doc_id_file, keyword_file, filter_keyword, iter):
+        self.keywords = self.load_keywords(keyword_file, full_data, filter_keyword, iter)
         self.keyword_to_id = self.gen_keyword_id()
         self.keyword_set = set(self.keywords)
         self.embeddings = self.load_embeddings(full_data)
         self.documents, self.original_doc_ids = self.load_documents(full_data, doc_id_file)
         self.keyword_idf = self.build_keyword_idf()
 
-    def load_keywords(self, keyword_file, full_data):
+    # def filter_similar_keywords_1(self, keywords, embeddings):
+    #     length = len(keywords)
+    #     i = 0
+    #     while i < length-1:
+    #         for j in range(length-1, i, -1):
+    #             if cossim(embeddings[keywords[i]], embeddings[keywords[j]]) > 0.85:  # 0.85 for 100-dimension,
+    #                 del keywords[j]
+    #         length = len(keywords)
+    #         i = i + 1
+    #     return keywords
+
+    def filter_similar_keywords(self, keywords, embeddings):
+        print('Start filtering very similar keywords...')
+        num_keywords = len(keywords)
+        start = time.time()
+        embeddings_array = np.array([])
+        dim = len(embeddings[keywords[0]])
+        for i in keywords:
+            embeddings_array = np.append(embeddings_array, [embeddings[i]])
+        embeddings_array = np.reshape(embeddings_array, (len(keywords), dim))
+        for i in range(len(embeddings_array)):
+            embeddings_array[i] = embeddings_array[i]/np.linalg.norm(embeddings_array[i])
+        sim = np.dot(embeddings_array, np.transpose(embeddings_array)) > 0.8
+        iu1 = np.tril_indices(len(sim))
+        sim[iu1] = False  # delete entries for lower triangular matrix
+        unique = (np.sum(sim, axis=0) == 0)
+        keywords = [keywords[i] for i in range(len(keywords)) if unique[i]]
+        end = time.time()
+        print('Time eclipse for keyword filtering: %s' % (end - start))
+        print('Number of filtered keywords: ', len(keywords) - num_keywords)
+        return keywords
+
+    def load_keywords(self, keyword_file, full_data, filter_keyword, iter):
         keywords = []
         with open(keyword_file, 'r') as fin:
             for line in fin:
@@ -77,6 +111,8 @@ class SubDataSet:
                     keywords.append(keyword)
                 else:
                     print(keyword, ' not in the embedding file')
+        if filter_keyword is True and iter == 0:
+            keywords = self.filter_similar_keywords(keywords, full_data.embeddings)
         return keywords
 
     def gen_keyword_id(self):
@@ -131,15 +167,38 @@ class SubDataSet:
         return keyword_idf
 
     # output_file: one integrated file;
-    def write_cluster_members(self, clus, cluster_file, parent_dir):
+    def write_cluster_members(self, clus, cluster_keyword_file, parent_dir, cluster_keyword_embedding, cluster_keyword_label):
         n_cluster = clus.n_cluster
         clusters = clus.clusters  # a dict: cluster id -> keywords
-        with open(cluster_file, 'w') as fout:
+        with open(cluster_keyword_file, 'w') as fout:
             for clus_id in range(n_cluster):
                 members = clusters[clus_id]
                 for keyword_id in members:
                     keyword = self.keywords[keyword_id]
                     fout.write(str(clus_id) + '\t' + keyword + '\n')
+
+        with open(cluster_keyword_embedding, 'w') as fout:
+            for clus_id in range(n_cluster):
+                members = clusters[clus_id]
+                for keyword_id in members:
+                    embedding = self.embeddings[keyword_id]
+                    for i in embedding:
+                        fout.write(str(i) + '\t')
+                    fout.write('\n')
+
+        with open(cluster_keyword_label, 'w') as fout:
+            for clus_id in range(n_cluster):
+                members = clusters[clus_id]
+                for i in range(len(members)):
+                    fout.write(str(clus_id) + '\n')
+
+        with open(cluster_keyword_file[:-4] + '_label1.txt', 'w') as fout:
+            for clus_id in range(n_cluster):
+                members = clusters[clus_id]
+                for keyword_id in members:
+                    keyword = self.keywords[keyword_id]
+                    fout.write(keyword + '\n')
+
         # write the cluster for each sub-folder
         clus_centers = clus.center_ids
         for clus_id, center_keyword_id in clus_centers:
