@@ -4,7 +4,6 @@ __description__: A wrapper for spherecluster, implement the term clustering comp
 __latest_updates__: 09/25/2017
 '''
 from collections import defaultdict
-
 from scipy.spatial.distance import cosine
 from spherecluster import SphericalKMeans
 from dataset import SubDataSet
@@ -54,6 +53,41 @@ class Clusterer:
                 ret = member_idx
         return ret
 
+    def update_center_ids(self, n_cluster):
+        print('Updating cluster centers')
+        center_idx = []
+        for cluster_id in range(self.n_cluster):
+            center_idx.append(self.update_one_center_id(cluster_id, n_cluster))
+        self.new_center_ids = center_idx
+
+    def update_one_center_id(self, cluster_id, n_cluster):
+        # Read the data, Perform k-means
+        data = self.data[self.clusters[cluster_id]]
+        ##  Consider the frequency and re-calculate the new mean.
+        # new_mean = sum(data)
+        ##  Just the average of clusters
+        clus = SphericalKMeans(n_cluster)
+        clus.fit(data)
+        new_mean = sum(clus.cluster_centers_)
+
+        # Normalize new_mean
+        norm = 0
+        for x in new_mean:
+            norm += x ** 2
+        new_mean = [x / (norm ** 0.5) for x in new_mean]
+        # print('Cos sim for old mean and new mean is: ', cossim(new_mean, clus.cluster_centers_[cluster_id]))
+        # Find closest index to new_mean
+        members = self.clusters[cluster_id]
+        best_similarity, ret = -1, -1
+        for member_idx in members:
+            member_vec = self.data[member_idx]
+            cosine_sim = self.calc_cosine(new_mean, member_vec)
+            if cosine_sim > best_similarity:
+                best_similarity = cosine_sim
+                ret = member_idx
+        return (cluster_id, ret)
+
+
     def write_keywords_to_file(self, keywords, parent_direcotry):
         for i in range(self.n_cluster):
             filename = parent_direcotry + 'cluster_' + str(i) + '.txt'
@@ -79,10 +113,11 @@ def run_clustering(full_data, doc_id_file, filter_keyword_file, n_cluster, paren
     ## TODO: change later here for n_cluster selection from a range
     clus = Clusterer(dataset.embeddings, n_cluster)
     clus.fit()
-    clus.write_keywords_to_file(dataset.keywords, parent_direcotry)
+    clus.update_center_ids(n_cluster)  # To find the general terms
     print('Done clustering for ', len(dataset.keywords), ' keywords under parent:', parent_description)
     dataset.write_cluster_members(clus, cluster_keyword_file, parent_direcotry, cluster_keyword_embedding, cluster_keyword_label)
-    center_names = dataset.write_cluster_centers(clus, parent_description, hierarchy_file)
     dataset.write_document_membership(clus, doc_membership_file, parent_direcotry)
+    # clus.write_keywords_to_file(dataset.keywords, parent_direcotry)
+    center_names = dataset.write_cluster_centers(clus, parent_description, hierarchy_file)
     print('Done saving cluster results for ', len(dataset.keywords), ' keywords under parent:', parent_description)
     return center_names

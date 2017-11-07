@@ -16,7 +16,7 @@ from distutils.dir_util import copy_tree
 from os import symlink
 from meanshift import run_meanshift
 
-MAX_LEVEL = 1
+MAX_LEVEL = 2
 
 class DataFiles:
     def __init__(self, input_dir, node_dir):
@@ -33,7 +33,6 @@ class DataFiles:
         self.cluster_keyword_file = node_dir + 'cluster_keywords.txt'
         self.cluster_keyword_embedding = node_dir + 'cluster_keywords_embedding.txt'
         self.cluster_keyword_label = node_dir + 'cluster_keywords_label.txt'
-
 
         self.caseolap_keyword_file = node_dir + 'caseolap.txt'
         self.filtered_keyword_file = node_dir + 'keywords.txt'
@@ -125,7 +124,7 @@ def main(opt):
     # Non-para
     root_dir = opt['data_dir'] + 'non-para/'
     copy_tree(init_dir, root_dir)
-    recur(input_dir, root_dir, n_cluster, '*', n_cluster_iter, filter_thre, n_expand, level, True, False, True)
+    recur(input_dir, root_dir, n_cluster, '*', n_cluster_iter, filter_thre, n_expand, level, True, False, False)
 
     # TaxonGen
     # root_dir = opt['data_dir'] + 'our-l3-0.15/'

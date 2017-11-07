@@ -83,8 +83,8 @@ class SubDataSet:
 
     def filter_similar_keywords(self, keywords, embeddings):
         print('Start filtering very similar keywords...')
-        num_keywords = len(keywords)
         start = time.time()
+        num_keywords = len(keywords)
         embeddings_array = np.array([])
         dim = len(embeddings[keywords[0]])
         for i in keywords:
@@ -92,7 +92,13 @@ class SubDataSet:
         embeddings_array = np.reshape(embeddings_array, (len(keywords), dim))
         for i in range(len(embeddings_array)):
             embeddings_array[i] = embeddings_array[i]/np.linalg.norm(embeddings_array[i])
-        sim = np.dot(embeddings_array, np.transpose(embeddings_array)) > 0.8
+        if dim == 30:
+            thres = 0.9
+        elif dim == 50:
+            thres = 0.85
+        elif dim == 100:
+            thres = 0.8
+        sim = np.dot(embeddings_array, np.transpose(embeddings_array)) > thres
         iu1 = np.tril_indices(len(sim))
         sim[iu1] = False  # delete entries for lower triangular matrix
         unique = (np.sum(sim, axis=0) == 0)
@@ -112,6 +118,8 @@ class SubDataSet:
                 else:
                     print(keyword, ' not in the embedding file')
         if filter_keyword is True and iter == 0:
+            '''now, the filtering is just select the first keyword, regardless of which keyword is the best one. '''
+            '''To DO: select the center embeddings as the keyword, and filter others.'''
             keywords = self.filter_similar_keywords(keywords, full_data.embeddings)
         return keywords
 
@@ -126,7 +134,7 @@ class SubDataSet:
         ret = []
         for word in self.keywords:
             vec = embeddings[word]
-            vec = vec / np.linalg.norm(vec)  # Normalize to unit length
+            # vec = vec / np.linalg.norm(vec)  # Normalize to unit length
             ret.append(vec)
         return np.array(ret)
 
@@ -212,7 +220,11 @@ class SubDataSet:
                     fout.write(keyword + '\n')
 
     def write_cluster_centers(self, clus, parent_description, output_file):
-        clus_centers = clus.center_ids
+        #  Write to hierarchy.txt
+        try:
+            clus_centers = clus.new_center_ids
+        except:
+            clus_centers = clus.center_ids
         center_names = []
         with open(output_file, 'w') as fout:
             for cluster_id, keyword_idx in clus_centers:
