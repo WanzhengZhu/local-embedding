@@ -72,7 +72,7 @@ def load_toy_params():
 def load_dblp_params():
     pd = dict()
     pd['data_dir'] = '/Users/wanzheng/Desktop/local-embedding/data/dblp/'
-    if not (os.path.isdir(pd['data_dir'])):
+    if not (os.path.isdir(pd['data_dir'])):  # Server path
         pd['data_dir'] = '/home/wz6/local-embedding/data/dblp/'
     pd['doc_file'] = pd['data_dir'] + 'input/papers.txt'
     pd['doc_keyword_cnt_file'] = pd['data_dir'] + 'input/keyword_cnt.txt'

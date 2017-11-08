@@ -7,6 +7,7 @@ from collections import defaultdict
 from scipy.spatial.distance import cosine
 from spherecluster import SphericalKMeans
 from dataset import SubDataSet
+from find_general_terms import find_general_terms
 
 class Clusterer:
 
@@ -107,17 +108,21 @@ class Clusterer:
 
 
 def run_clustering(full_data, doc_id_file, filter_keyword_file, n_cluster, parent_direcotry, parent_description,\
-                   cluster_keyword_file, hierarchy_file, doc_membership_file, cluster_keyword_embedding, cluster_keyword_label, filter_keyword, iter):
+                   cluster_keyword_file, hierarchy_file, doc_membership_file, cluster_keyword_embedding, \
+                   cluster_keyword_label, filter_keyword, iter, update_center, input_dir):
     dataset = SubDataSet(full_data, doc_id_file, filter_keyword_file, filter_keyword, iter)
     print('Start clustering for ', len(dataset.keywords), ' keywords under parent:', parent_description)
     ## TODO: change later here for n_cluster selection from a range
     clus = Clusterer(dataset.embeddings, n_cluster)
     clus.fit()
-    clus.update_center_ids(n_cluster)  # To find the general terms
+    if update_center:
+        clus.update_center_ids(n_cluster)  # To find the general terms
     print('Done clustering for ', len(dataset.keywords), ' keywords under parent:', parent_description)
-    dataset.write_cluster_members(clus, cluster_keyword_file, parent_direcotry, cluster_keyword_embedding, cluster_keyword_label)
-    dataset.write_document_membership(clus, doc_membership_file, parent_direcotry)
     # clus.write_keywords_to_file(dataset.keywords, parent_direcotry)
-    center_names = dataset.write_cluster_centers(clus, parent_description, hierarchy_file)
+    dataset.write_document_membership(clus, doc_membership_file, parent_direcotry)
+    center_names = dataset.write_to_hierarchy(clus, parent_description, hierarchy_file)
+    general_terms = []
+    general_terms = find_general_terms(input_dir, parent_direcotry, center_names)
+    dataset.write_cluster_members(clus, cluster_keyword_file, parent_direcotry, cluster_keyword_embedding, cluster_keyword_label, general_terms)
     print('Done saving cluster results for ', len(dataset.keywords), ' keywords under parent:', parent_description)
     return center_names

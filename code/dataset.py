@@ -10,7 +10,6 @@ from math import log
 from utils import ensure_directory_exist
 import time
 
-
 # the complete data set
 class DataSet:
 
@@ -175,7 +174,7 @@ class SubDataSet:
         return keyword_idf
 
     # output_file: one integrated file;
-    def write_cluster_members(self, clus, cluster_keyword_file, parent_dir, cluster_keyword_embedding, cluster_keyword_label):
+    def write_cluster_members(self, clus, cluster_keyword_file, parent_dir, cluster_keyword_embedding, cluster_keyword_label, general_terms):
         n_cluster = clus.n_cluster
         clusters = clus.clusters  # a dict: cluster id -> keywords
         with open(cluster_keyword_file, 'w') as fout:
@@ -208,7 +207,10 @@ class SubDataSet:
                     fout.write(keyword + '\n')
 
         # write the cluster for each sub-folder
-        clus_centers = clus.center_ids
+        try:
+            clus_centers = clus.new_center_ids
+        except:
+            clus_centers = clus.center_ids
         for clus_id, center_keyword_id in clus_centers:
             center_keyword = self.keywords[center_keyword_id]
             output_file = parent_dir + center_keyword + '/seed_keywords.txt'
@@ -217,9 +219,10 @@ class SubDataSet:
             with open(output_file, 'w') as fout:
                 for keyword_id in members:
                     keyword = self.keywords[keyword_id]
-                    fout.write(keyword + '\n')
+                    if keyword not in general_terms:
+                        fout.write(keyword + '\n')
 
-    def write_cluster_centers(self, clus, parent_description, output_file):
+    def write_to_hierarchy(self, clus, parent_description, output_file):
         #  Write to hierarchy.txt
         try:
             clus_centers = clus.new_center_ids
@@ -235,6 +238,7 @@ class SubDataSet:
 
 
     def write_document_membership(self, clus, output_file, parent_dir):
+        # write paper_cluster.txt
         n_cluster = clus.n_cluster
         keyword_membership = clus.membership  # an array containing the membership of the keywords
         cluster_document_map = defaultdict(list)  # key: cluster id, value: document list
@@ -244,8 +248,13 @@ class SubDataSet:
                 cluster_id = self.assign_document(doc_membership)
                 cluster_document_map[cluster_id].append(idx)
                 fout.write(str(idx) + '\t' + str(cluster_id) + '\n')
+
         # write the document ids for each sub-folder
-        clus_centers = clus.center_ids
+        try:
+            clus_centers = clus.new_center_ids
+        except:
+            clus_centers = clus.center_ids
+
         for clus_id, center_keyword_id in clus_centers:
             center_keyword = self.keywords[center_keyword_id]
             output_file = parent_dir + center_keyword + '/doc_ids.txt'
