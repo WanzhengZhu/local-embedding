@@ -121,8 +121,9 @@ def run_clustering(full_data, doc_id_file, filter_keyword_file, n_cluster, paren
     # clus.write_keywords_to_file(dataset.keywords, parent_direcotry)
     dataset.write_document_membership(clus, doc_membership_file, parent_direcotry)
     center_names = dataset.write_to_hierarchy(clus, parent_description, hierarchy_file)
-    general_terms = []
-    general_terms = find_general_terms(input_dir, parent_direcotry, center_names)
-    dataset.write_cluster_members(clus, cluster_keyword_file, parent_direcotry, cluster_keyword_embedding, cluster_keyword_label, general_terms)
+    general_terms, specific_terms = find_general_terms(input_dir, parent_direcotry, center_names, filter_keyword_file)
+    # general_terms = []
+    # specific_terms = []
+    dataset.write_cluster_members(clus, cluster_keyword_file, parent_direcotry, cluster_keyword_embedding, cluster_keyword_label, general_terms, specific_terms)
     print('Done saving cluster results for ', len(dataset.keywords), ' keywords under parent:', parent_description)
     return center_names

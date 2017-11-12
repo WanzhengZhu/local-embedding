@@ -114,8 +114,8 @@ class SubDataSet:
                 keyword = line.strip()
                 if keyword in full_data.embeddings:
                     keywords.append(keyword)
-                else:
-                    print(keyword, ' not in the embedding file')
+                # else:
+                #     print(keyword, ' not in the embedding file')
         if filter_keyword is True and iter == 0:
             '''now, the filtering is just select the first keyword, regardless of which keyword is the best one. '''
             '''To DO: select the center embeddings as the keyword, and filter others.'''
@@ -174,7 +174,7 @@ class SubDataSet:
         return keyword_idf
 
     # output_file: one integrated file;
-    def write_cluster_members(self, clus, cluster_keyword_file, parent_dir, cluster_keyword_embedding, cluster_keyword_label, general_terms):
+    def write_cluster_members(self, clus, cluster_keyword_file, parent_dir, cluster_keyword_embedding, cluster_keyword_label, general_terms, specific_terms):
         n_cluster = clus.n_cluster
         clusters = clus.clusters  # a dict: cluster id -> keywords
         with open(cluster_keyword_file, 'w') as fout:
@@ -206,7 +206,7 @@ class SubDataSet:
                     keyword = self.keywords[keyword_id]
                     fout.write(keyword + '\n')
 
-        # write the cluster for each sub-folder
+        # write the cluster & seed_keywords.txt for each sub-folder
         try:
             clus_centers = clus.new_center_ids
         except:
@@ -219,7 +219,8 @@ class SubDataSet:
             with open(output_file, 'w') as fout:
                 for keyword_id in members:
                     keyword = self.keywords[keyword_id]
-                    if keyword not in general_terms:
+                    # if keyword not in general_terms:  # Do NOT write the general terms into next level.
+                    if keyword in specific_terms[clus_id]:
                         fout.write(keyword + '\n')
 
     def write_to_hierarchy(self, clus, parent_description, output_file):

@@ -62,7 +62,7 @@ def load_toy_params():
     pd['doc_keyword_cnt_file'] = pd['data_dir'] + 'input/keyword_cnt.txt'
     pd['input_dir'] = pd['data_dir'] + 'input/'
     pd['root_node_dir'] = pd['data_dir'] + 'cluster/'
-    pd['n_cluster'] = 2
+    pd['n_cluster'] = 3
     pd['filter_thre'] = 0.15
     pd['n_expand'] = 100
     pd['n_cluster_iter'] = 2
