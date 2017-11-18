@@ -219,8 +219,8 @@ class SubDataSet:
             with open(output_file, 'w') as fout:
                 for keyword_id in members:
                     keyword = self.keywords[keyword_id]
-                    # if keyword not in general_terms:  # Do NOT write the general terms into next level.
-                    if keyword in specific_terms[clus_id]:
+                    if keyword not in general_terms:  # Do NOT write the general terms into next level.
+                    # if keyword in specific_terms[clus_id]:
                         fout.write(keyword + '\n')
 
     def write_to_hierarchy(self, clus, parent_description, output_file):

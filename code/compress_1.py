@@ -163,18 +163,14 @@ def recursion(root, o_file, N):
 
     q = Queue.Queue()
     q.put((root, -1, '*'))
-
     g = open(o_file, 'w+')
-
     while not q.empty():
         (c_folder, c_id, c_name) = q.get()
-        
         hier_f = '%s/hierarchy.txt' % c_folder
+        g.write('%s\n' % c_name)
         if not exists(hier_f):
             continue
-
         hier_map = utils.load_hier_f(hier_f)
-
         for cluster in hier_map:
             cc_id = hier_map[cluster]
             cluster_folder = '%s/%s' % (c_folder, cluster)
@@ -182,31 +178,29 @@ def recursion(root, o_file, N):
             q.put((cluster_folder, cc_id, cluster_namespace))
 
         # handle current
-        if c_folder != root:
-            phs = get_rep(c_folder, str(c_id), N)
-            phs_str = ','.join(phs)
-            g.write('%s\t%s\n' % (c_name, phs_str))
+        # if c_folder != root:
+            # phs = get_rep(c_folder, str(c_id), N)
+            # phs_str = ','.join(phs)
+            # g.write('%s\t%s\n' % (c_name, phs_str))
+            # g.write('%s\n' % c_name)
 
     g.close()
 
-
 if __name__ == "__main__":
-  # python compress.py -root ../data/dblp/our-l3-0.15 -output ../data/dblp/taxonomies/l3-our-0.15.txt
-    parser = argparse.ArgumentParser(prog='compress.py', description='')
-    parser.add_argument('-root', required=True, help='root of data files.')
-    parser.add_argument('-output', required=True, help='output file name.')
-    parser.add_argument('-reidx', required=False, help='reindex_file.')
-    parser.add_argument('-N', required=False, help='number of phrases included.')
-    args = parser.parse_args()
-
+    # python compress.py -root ../data/dblp/non-para -output ../data/dblp/taxonomies/non-para.txt
+    # parser = argparse.ArgumentParser(prog='compress.py', description='')
+    # parser.add_argument('-root', required=True, help='root of data files.')
+    # parser.add_argument('-output', required=True, help='output file name.')
+    # parser.add_argument('-reidx', required=False, help='reindex_file.')
+    # parser.add_argument('-N', required=False, help='number of phrases included.')
+    # args = parser.parse_args()
 
     N = 10
-    if args.N is not None:
-        N = int(args.N)
+    # if args.N is not None:
+    #     N = int(args.N)
 
-    if args.reidx is not None:
-        parse_reidx(args.reidx)
+    # if args.reidx is not None:
+    #     parse_reidx(args.reidx)
 
-    recursion(args.root, args.output, N)
-
-
+    # recursion(args.root, args.output, N)
+recursion('../data/dblp/non-para-000-nogeneral', '../data/dblp/taxonomies/non-para-000-nogeneral.txt', N)
