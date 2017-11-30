@@ -68,6 +68,8 @@ class SubDataSet:
         self.embeddings = self.load_embeddings(full_data)
         self.documents, self.original_doc_ids = self.load_documents(full_data, doc_id_file)
         self.keyword_idf = self.build_keyword_idf()
+        if iter == 0:
+            self.keywords_previous_len = 0
 
     # def filter_similar_keywords_1(self, keywords, embeddings):
     #     length = len(keywords)
@@ -133,7 +135,7 @@ class SubDataSet:
         ret = []
         for word in self.keywords:
             vec = embeddings[word]
-            # vec = vec / np.linalg.norm(vec)  # Normalize to unit length
+            vec = vec / np.linalg.norm(vec)  # Normalize to unit length
             ret.append(vec)
         return np.array(ret)
 

@@ -2,7 +2,7 @@
 ## Name of the input corpus
 corpusName=${1:-toy}
 ## Name of the taxonomy
-taxonName=non-para
+taxonName=non-para-5
 ## If need preprocessing from raw input, set it to be 1, otherwise, set 0
 FIRST_RUN=${FIRST_RUN:- 0}
 
@@ -32,10 +32,12 @@ if [ ! -d ../data/$corpusName/$taxonName ]; then
 fi
 
 echo 'Start TaxonGen'
-python main.py -dataset $corpusName
+python main.py -dataset $corpusName -foldername $taxonName
 
 echo 'Generate compressed taxonomy'
 if [ ! -d ../data/$corpusName/taxonomies ]; then
 	mkdir ../data/$corpusName/taxonomies
 fi
+
+python compress_1.py -root ../data/$corpusName/$taxonName -output ../data/$corpusName/taxonomies/$taxonName-short.txt
 python compress.py -root ../data/$corpusName/$taxonName -output ../data/$corpusName/taxonomies/$taxonName.txt

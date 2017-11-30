@@ -7,7 +7,6 @@ import time
 import argparse
 from dataset import DataSet
 from cluster import run_clustering
-from find_general_terms import find_general_terms
 from paras import *
 from caseslim import main_caseolap
 from case_ranker import main_rank_phrase
@@ -17,8 +16,10 @@ from distutils.dir_util import copy_tree
 from os import symlink
 from shutil import rmtree
 from meanshift import run_meanshift
+from dataset import SubDataSet
 
-MAX_LEVEL = 1
+
+MAX_LEVEL = 0
 
 class DataFiles:
     def __init__(self, input_dir, node_dir):
@@ -65,7 +66,7 @@ def recur(input_dir, node_dir, n_cluster, parent, n_cluster_iter, filter_thre,\
     # filter the keywords
     if caseolap is False:
         # children = run_clustering(full_data, df.doc_id_file, df.seed_keyword_file, n_cluster, node_dir, parent, df.cluster_keyword_file, df.hierarchy_file, df.doc_membership_file, df.cluster_keyword_embedding, df.cluster_keyword_label, filter_keyword, 0, update_center, input_dir)
-        # children = run_meanshift(full_data, df.doc_id_file, df.seed_keyword_file, node_dir, parent, df.cluster_keyword_file, df.hierarchy_file, df.doc_membership_file)
+        # children = run_meanshift(full_data, df.doc_id_file, df.seed_keyword_file, node_dir, parent, df.cluster_keyword_file, df.hierarchy_file, df.doc_membership_file, df.cluster_keyword_embedding, df.cluster_keyword_label, filter_keyword, 0, update_center, input_dir)
 
         try:
             children = run_clustering(full_data, df.doc_id_file, df.seed_keyword_file, n_cluster, node_dir, parent, df.cluster_keyword_file, df.hierarchy_file, df.doc_membership_file, df.cluster_keyword_embedding, df.cluster_keyword_label, filter_keyword, 0, update_center, input_dir)
@@ -76,21 +77,26 @@ def recur(input_dir, node_dir, n_cluster, parent, n_cluster_iter, filter_thre,\
         copyfile(df.seed_keyword_file, df.filtered_keyword_file)
     else:
         ## Adaptive Clustering, maximal n_cluster_iter iterations
+        previous_num_of_keywords = 0
         for iter in range(n_cluster_iter):
             if iter > 0:
                 df.seed_keyword_file = df.filtered_keyword_file
 
             # children = run_clustering(full_data, df.doc_id_file, df.seed_keyword_file, n_cluster, node_dir, parent,df.cluster_keyword_file, df.hierarchy_file, df.doc_membership_file, df.cluster_keyword_embedding, df.cluster_keyword_label, filter_keyword, iter, update_center)
-
             try:
-                children = run_clustering(full_data, df.doc_id_file, df.seed_keyword_file, n_cluster, node_dir, parent,df.cluster_keyword_file, df.hierarchy_file, df.doc_membership_file, df.cluster_keyword_embedding, df.cluster_keyword_label, filter_keyword, iter, update_center, input_dir)
+                dataset = SubDataSet(full_data, df.doc_id_file, df.seed_keyword_file, filter_keyword, iter)
+                if len(dataset.keywords) == previous_num_of_keywords:  # Convergence achieved!
+                    print("Convergence achieved at %s" % str(iter) + '/' + str(n_cluster_iter-1))
+                    print("Number of keywords for clustering is: %s" % previous_num_of_keywords)
+                    break
+                children, previous_num_of_keywords = run_clustering(dataset, n_cluster, node_dir, parent,df.cluster_keyword_file, df.hierarchy_file, df.doc_membership_file, df.cluster_keyword_embedding, df.cluster_keyword_label, filter_keyword, iter, update_center, input_dir)
                 # children = run_meanshift(full_data, df.doc_id_file, df.seed_keyword_file, node_dir, parent, df.cluster_keyword_file, df.hierarchy_file, df.doc_membership_file)
             except:
                 print('Clustering not finished.')
                 return
 
             if iter != n_cluster_iter-1:  # Needless to run for the last loop
-                print("[Main] Start to run CaseOALP ")
+                print("[Main] Start to run CaseOALP: %s" % str(iter) + '/' + str(n_cluster_iter-1))
                 start = time.time()
                 main_caseolap(df.link_file, df.doc_membership_file, df.cluster_keyword_file, df.caseolap_keyword_file)
                 main_rank_phrase(df.caseolap_keyword_file, df.filtered_keyword_file, filter_thre)
@@ -116,7 +122,7 @@ def recur(input_dir, node_dir, n_cluster, parent, n_cluster_iter, filter_thre,\
     for child in children:
         recur(input_dir, node_dir + child + '/', n_cluster, child, n_cluster_iter, filter_thre, n_expand, level + 1, caseolap, local_embedding, filter_keyword, update_center)
 
-def main(opt):
+def main(opt, foldername):
     input_dir = opt['input_dir']
     init_dir = opt['data_dir'] + 'init/'
     n_cluster = opt['n_cluster']
@@ -126,11 +132,11 @@ def main(opt):
     level = 0
 
     # Non-para
-    root_dir = opt['data_dir'] + 'non-para/'
+    root_dir = opt['data_dir'] + foldername + '/'
     if os.path.exists(root_dir):
         rmtree(root_dir)
     copy_tree(init_dir, root_dir)
-    recur(input_dir, root_dir, n_cluster, '*', n_cluster_iter, filter_thre, n_expand, level, caseolap=False, local_embedding=False, filter_keyword=False, update_center=False)
+    recur(input_dir, root_dir, n_cluster, '*', n_cluster_iter, filter_thre, n_expand, level, caseolap=True, local_embedding=False, filter_keyword=False, update_center=False)
 
     # TaxonGen
     # root_dir = opt['data_dir'] + 'our-l3-0.15/'
@@ -156,6 +162,7 @@ def main(opt):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='main.py', description='')
     parser.add_argument('-dataset', required=False, default='toy', help='toy or dblp or sp')
+    parser.add_argument('-foldername', required=False, default='non-para', help='non-para')
     args = parser.parse_args()
     print("Loading " + args.dataset + " dataset...")
     if args.dataset == 'toy':
@@ -165,4 +172,4 @@ if __name__ == '__main__':
     elif args.dataset == 'sp':
         opt = load_sp_params()
     # opt = load_dblp_params_method()
-    main(opt)
+    main(opt, args.foldername)

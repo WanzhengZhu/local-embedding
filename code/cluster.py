@@ -31,7 +31,7 @@ class Clusterer:
         self.membership = labels
         self.center_ids = self.gen_center_idx()
         self.inertia_scores = self.clus.inertia_
-        print('Clustering concentration score:', self.inertia_scores)
+        print('Sum of distances of samples to their closest cluster center:', self.inertia_scores)
 
     # find the idx of each cluster center
     def gen_center_idx(self):
@@ -107,10 +107,10 @@ class Clusterer:
         return 1 - cosine(vec_a, vec_b)
 
 
-def run_clustering(full_data, doc_id_file, filter_keyword_file, n_cluster, parent_direcotry, parent_description,\
+def run_clustering(dataset, n_cluster, parent_direcotry, parent_description,\
                    cluster_keyword_file, hierarchy_file, doc_membership_file, cluster_keyword_embedding, \
                    cluster_keyword_label, filter_keyword, iter, update_center, input_dir):
-    dataset = SubDataSet(full_data, doc_id_file, filter_keyword_file, filter_keyword, iter)
+    # dataset = SubDataSet(full_data, doc_id_file, filter_keyword_file, filter_keyword, iter)
     print('Start clustering for ', len(dataset.keywords), ' keywords under parent:', parent_description)
     ## TODO: change later here for n_cluster selection from a range
     clus = Clusterer(dataset.embeddings, n_cluster)
@@ -126,4 +126,4 @@ def run_clustering(full_data, doc_id_file, filter_keyword_file, n_cluster, paren
     specific_terms = []
     dataset.write_cluster_members(clus, cluster_keyword_file, parent_direcotry, cluster_keyword_embedding, cluster_keyword_label, general_terms, specific_terms)
     print('Done saving cluster results for ', len(dataset.keywords), ' keywords under parent:', parent_description)
-    return center_names
+    return center_names, len(dataset.keywords)

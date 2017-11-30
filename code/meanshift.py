@@ -151,10 +151,11 @@ def test_example(choice):
 
 
 def run_meanshift(full_data, doc_id_file, filter_keyword_file, parent_direcotry, parent_description,\
-                   cluster_keyword_file, hierarchy_file, doc_membership_file):
+                   cluster_keyword_file, hierarchy_file, doc_membership_file, cluster_keyword_embedding, \
+                   cluster_keyword_label, filter_keyword, iter, update_center, input_dir):
     # test_example(0)
     # array = np.array([val for (key, val) in full_data.embeddings.iteritems()])
-    dataset = SubDataSet(full_data, doc_id_file, filter_keyword_file)
+    dataset = SubDataSet(full_data, doc_id_file, filter_keyword_file, filter_keyword, iter)
     print('Start Mean Shifting for ', len(dataset.keywords), ' keywords under parent:', parent_description)
     ## TODO: change later here for n_cluster selection from a range
     clus = Meanshifter(dataset.embeddings, parent_direcotry)
