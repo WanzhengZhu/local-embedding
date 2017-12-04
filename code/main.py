@@ -89,7 +89,7 @@ def recur(input_dir, node_dir, n_cluster, parent, n_cluster_iter, filter_thre,\
                     print("Convergence achieved at %s" % str(iter) + '/' + str(n_cluster_iter-1))
                     print("Number of keywords for clustering is: %s" % previous_num_of_keywords)
                     break
-                children, previous_num_of_keywords = run_clustering(dataset, n_cluster, node_dir, parent,df.cluster_keyword_file, df.hierarchy_file, df.doc_membership_file, df.cluster_keyword_embedding, df.cluster_keyword_label, filter_keyword, iter, update_center, input_dir)
+                children, previous_num_of_keywords = run_clustering(dataset, df.seed_keyword_file, n_cluster, node_dir, parent,df.cluster_keyword_file, df.hierarchy_file, df.doc_membership_file, df.cluster_keyword_embedding, df.cluster_keyword_label, filter_keyword, iter, update_center, input_dir)
                 # children = run_meanshift(full_data, df.doc_id_file, df.seed_keyword_file, node_dir, parent, df.cluster_keyword_file, df.hierarchy_file, df.doc_membership_file)
             except:
                 print('Clustering not finished.')

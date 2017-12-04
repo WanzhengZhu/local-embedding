@@ -65,9 +65,9 @@ def write_keywords(o_file, ranked_list, thres):
             g.write('%s\t%f\n' % (ph[0], ph[1]))
 
 def main_rank_phrase(input_f, output_f, thres):
-  ranked_list = rank_phrase(input_f)
-  write_keywords(output_f, ranked_list, thres)
-  print("[CaseOLAP] Finish pushing general terms up")
+    ranked_list = rank_phrase(input_f)  #
+    write_keywords(output_f, ranked_list, thres)  # Write to file once a keyword's score is above threshold.
+    print("[CaseOLAP] Finish pushing general terms up")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(prog='case_ranker.py', \

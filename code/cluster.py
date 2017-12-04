@@ -107,7 +107,7 @@ class Clusterer:
         return 1 - cosine(vec_a, vec_b)
 
 
-def run_clustering(dataset, n_cluster, parent_direcotry, parent_description,\
+def run_clustering(dataset, filter_keyword_file, n_cluster, parent_direcotry, parent_description,\
                    cluster_keyword_file, hierarchy_file, doc_membership_file, cluster_keyword_embedding, \
                    cluster_keyword_label, filter_keyword, iter, update_center, input_dir):
     # dataset = SubDataSet(full_data, doc_id_file, filter_keyword_file, filter_keyword, iter)
