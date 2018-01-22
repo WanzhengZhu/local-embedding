@@ -241,7 +241,7 @@ class SubDataSet:
 
 
     def write_document_membership(self, clus, output_file, parent_dir):
-        # write paper_cluster.txt
+        # Step1: write paper_cluster.txt
         n_cluster = clus.n_cluster
         keyword_membership = clus.membership  # an array containing the membership of the keywords
         cluster_document_map = defaultdict(list)  # key: cluster id, value: document list
@@ -252,7 +252,7 @@ class SubDataSet:
                 cluster_document_map[cluster_id].append(idx)
                 fout.write(str(idx) + '\t' + str(cluster_id) + '\n')
 
-        # write the document ids for each sub-folder
+        # Step2: write the document ids for each sub-folder
         try:
             clus_centers = clus.new_center_ids
         except:

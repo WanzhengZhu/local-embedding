@@ -120,8 +120,11 @@ def find_general_terms(input_dir, node_dir, center_names, keywords_file):
             fout.write('\n')
             print 'Non-zero percentage: ' + str(keyword_number) + '/' + str(dimension)
 
-    for i in specific_terms:
-        print i.__len__()
+    for i in range(len(specific_terms)):
+        print('[find_general_terms] Specific terms: ', specific_terms[i].__len__())
+        with open(node_dir + 'repre_cand_' + str(i) + '.txt', 'w') as fout:
+            for j in specific_terms[i]:
+                fout.write(j + '\n')
 
     # General terms for all clusters
     result = set(nondetermining_terms[0])
@@ -135,7 +138,7 @@ def find_general_terms(input_dir, node_dir, center_names, keywords_file):
             fout.write(i + '\n')
             general_terms.append(i)
 
-    print general_terms.__len__()
+    print('[find_general_terms] General terms: ', general_terms.__len__())
     end = time.time()
     print('[find_general_terms] Finish finding general terms using time %s second' % (end-begin))
     return general_terms, specific_terms

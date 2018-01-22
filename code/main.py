@@ -19,7 +19,7 @@ from meanshift import run_meanshift
 from dataset import SubDataSet
 
 
-MAX_LEVEL = 0
+MAX_LEVEL = 1
 
 class DataFiles:
     def __init__(self, input_dir, node_dir):
@@ -51,8 +51,7 @@ n_expand: the number of phrases to expand from the center
 level: the current level in the recursion
 '''
 
-def recur(input_dir, node_dir, n_cluster, parent, n_cluster_iter, filter_thre,\
-          n_expand, level, caseolap, local_embedding, filter_keyword, update_center):
+def recur(input_dir, node_dir, n_cluster, parent, n_cluster_iter, filter_thre, n_expand, level, caseolap, local_embedding, filter_keyword, update_center):
     if level > MAX_LEVEL:
         return
     print('============================= Running level ', level, ' and node ', parent, '=============================')
@@ -69,7 +68,9 @@ def recur(input_dir, node_dir, n_cluster, parent, n_cluster_iter, filter_thre,\
         # children = run_meanshift(full_data, df.doc_id_file, df.seed_keyword_file, node_dir, parent, df.cluster_keyword_file, df.hierarchy_file, df.doc_membership_file, df.cluster_keyword_embedding, df.cluster_keyword_label, filter_keyword, 0, update_center, input_dir)
 
         try:
-            children = run_clustering(full_data, df.doc_id_file, df.seed_keyword_file, n_cluster, node_dir, parent, df.cluster_keyword_file, df.hierarchy_file, df.doc_membership_file, df.cluster_keyword_embedding, df.cluster_keyword_label, filter_keyword, 0, update_center, input_dir)
+            dataset = SubDataSet(full_data, df.doc_id_file, df.seed_keyword_file, filter_keyword, 0)
+            children, previous_num_of_keywords = run_clustering(dataset, df.seed_keyword_file, n_cluster, node_dir, parent, df.cluster_keyword_file, df.hierarchy_file, df.doc_membership_file, df.cluster_keyword_embedding, df.cluster_keyword_label, update_center, input_dir)
+
             # children = run_meanshift(full_data, df.doc_id_file, df.seed_keyword_file, node_dir, parent, df.cluster_keyword_file, df.hierarchy_file, df.doc_membership_file)
         except:
             print('Clustering not finished.')
@@ -89,7 +90,7 @@ def recur(input_dir, node_dir, n_cluster, parent, n_cluster_iter, filter_thre,\
                     print("Convergence achieved at %s" % str(iter) + '/' + str(n_cluster_iter-1))
                     print("Number of keywords for clustering is: %s" % previous_num_of_keywords)
                     break
-                children, previous_num_of_keywords = run_clustering(dataset, df.seed_keyword_file, n_cluster, node_dir, parent,df.cluster_keyword_file, df.hierarchy_file, df.doc_membership_file, df.cluster_keyword_embedding, df.cluster_keyword_label, filter_keyword, iter, update_center, input_dir)
+                children, previous_num_of_keywords = run_clustering(dataset, df.seed_keyword_file, n_cluster, node_dir, parent,df.cluster_keyword_file, df.hierarchy_file, df.doc_membership_file, df.cluster_keyword_embedding, df.cluster_keyword_label, update_center, input_dir)
                 # children = run_meanshift(full_data, df.doc_id_file, df.seed_keyword_file, node_dir, parent, df.cluster_keyword_file, df.hierarchy_file, df.doc_membership_file)
             except:
                 print('Clustering not finished.')
@@ -137,26 +138,6 @@ def main(opt, foldername):
         rmtree(root_dir)
     copy_tree(init_dir, root_dir)
     recur(input_dir, root_dir, n_cluster, '*', n_cluster_iter, filter_thre, n_expand, level, caseolap=True, local_embedding=False, filter_keyword=False, update_center=False)
-
-    # TaxonGen
-    # root_dir = opt['data_dir'] + 'our-l3-0.15/'
-    # copy_tree(init_dir, root_dir)
-    # recur(input_dir, root_dir, n_cluster, '*', n_cluster_iter, filter_thre, n_expand, level, True, True)
-
-    # without caseolap
-    # root_dir = opt['data_dir'] + 'ablation-no-caseolap-l3/'
-    # copy_tree(init_dir, root_dir)
-    # recur(input_dir, root_dir, n_cluster, '*', n_cluster_iter, filter_thre, n_expand, level, False, True)
-
-    # # without local embedding
-    # root_dir = opt['data_dir'] + 'ablation-no-local-embedding-l3-0.15/'
-    # copy_tree(init_dir, root_dir)
-    # recur(input_dir, root_dir, n_cluster, '*', n_cluster_iter, filter_thre, n_expand, level, True, False)
-
-    # without caseolap and local embedding
-    # root_dir = opt['data_dir'] + 'hc-l3/'
-    # copy_tree(init_dir, root_dir)
-    # recur(input_dir, root_dir, n_cluster, '*', n_cluster_iter, filter_thre, n_expand, level, False, False)
 
 
 if __name__ == '__main__':
