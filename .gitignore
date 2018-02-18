@@ -1,6 +1,7 @@
 # data
 data/
 original_data/
+material/
 
 # SegPhrase output
 SegPhrase/
