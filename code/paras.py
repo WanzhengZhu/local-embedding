@@ -55,9 +55,7 @@ def change_params(pd, iter):
 
 def load_toy_params():
     pd = dict()
-    pd['data_dir'] = '/Users/wanzheng/Desktop/local-embedding/data/toy/'
-    if not (os.path.isdir(pd['data_dir'])):
-        pd['data_dir'] = '/home/wz6/local-embedding/data/toy/'
+    pd['data_dir'] = os.path.dirname(os.path.realpath(__file__)) + '/../data/toy/'
     pd['doc_file'] = pd['data_dir'] + 'input/papers.txt'
     pd['doc_keyword_cnt_file'] = pd['data_dir'] + 'input/keyword_cnt.txt'
     pd['input_dir'] = pd['data_dir'] + 'input/'
@@ -65,15 +63,13 @@ def load_toy_params():
     pd['n_cluster'] = 3
     pd['filter_thre'] = 0.15
     pd['n_expand'] = 100
-    pd['n_cluster_iter'] = 10
+    pd['n_cluster_iter'] = 5
     return pd
 
 
 def load_dblp_params():
     pd = dict()
-    pd['data_dir'] = '/Users/wanzheng/Desktop/local-embedding/data/dblp/'
-    if not (os.path.isdir(pd['data_dir'])):  # Server path
-        pd['data_dir'] = '/home/wz6/local-embedding/data/dblp/'
+    pd['data_dir'] = os.path.dirname(os.path.realpath(__file__)) + '/../data/dblp/'
     pd['doc_file'] = pd['data_dir'] + 'input/papers.txt'
     pd['doc_keyword_cnt_file'] = pd['data_dir'] + 'input/keyword_cnt.txt'
     pd['input_dir'] = pd['data_dir'] + 'input/'
@@ -87,10 +83,7 @@ def load_dblp_params():
 
 def load_sp_params():
     pd = dict()
-    # pd['data_dir'] = '/shared/data/czhang82/projects/local-embedding/sp/'
-    pd['data_dir'] = '/Users/wanzheng/Desktop/local-embedding/data/sp/'
-    if not (os.path.isdir(pd['data_dir'])):
-        pd['data_dir'] = '/home/wz6/local-embedding/data/sp/'
+    pd['data_dir'] = os.path.dirname(os.path.realpath(__file__)) + '/../data/sp/'
     pd['doc_file'] = pd['data_dir'] + 'input/papers.txt'
     pd['doc_keyword_cnt_file'] = pd['data_dir'] + 'input/keyword_cnt.txt'
     pd['input_dir'] = pd['data_dir'] + 'input/'
@@ -100,19 +93,3 @@ def load_sp_params():
     pd['n_expand'] = 200
     pd['n_cluster_iter'] = 5
     return pd
-
-
-# def load_dblp_params_method():
-#     pd = dict()
-#     pd['data_dir'] = '/Users/wanzheng/Desktop/local-embedding/data/dblp/'
-#     if not (os.path.isdir(pd['data_dir'])):
-#         pd['data_dir'] = '/shared/data/wz6/local-embedding/data/dblp/'
-#     pd['doc_file'] = pd['data_dir'] + 'input/papers.txt'
-#     pd['doc_keyword_cnt_file'] = pd['data_dir'] + 'input/keyword_cnt.txt'
-#     pd['input_dir'] = pd['data_dir'] + 'input/'
-#     pd['root_node_dir'] = pd['data_dir'] + 'cluster/'
-#     pd['n_cluster'] = 5
-#     pd['filter_thre'] = 0.25
-#     pd['n_expand'] = 100
-#     pd['n_cluster_iter'] = 2
-#     return pd

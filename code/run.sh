@@ -1,10 +1,7 @@
 #!/bin/bash
-## Name of the input corpus
-corpusName=${1:-toy}
-## Name of the taxonomy
-taxonName=non-para
-## If need preprocessing from raw input, set it to be 1, otherwise, set 0
-FIRST_RUN=${FIRST_RUN:- 0}
+corpusName=${1:-toy}    ## Name of the input corpus
+taxonName=non-para      ## Name of the taxonomy
+FIRST_RUN=${FIRST_RUN:- 0}      ## If need preprocessing from raw input, set it to be 1, otherwise, set 0
 
 if [ $FIRST_RUN -eq 1 ]; then
 	echo 'Start data preprocessing'
